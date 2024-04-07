@@ -23,9 +23,7 @@ namespace EmployeeApi.Infrastructure.Repositories
         public async Task<Employee?> GetSingleById(int id)
         {
             return await _dbContext.Employees
-                .Where(e => e.Id == id)
-                .AsNoTracking()
-                .SingleOrDefaultAsync();
+                .SingleOrDefaultAsync(e => e.Id == id);
         }
 
         public async Task<IEnumerable<Employee>> GetByBossId(int bossId)
@@ -74,7 +72,9 @@ namespace EmployeeApi.Infrastructure.Repositories
 
         public async Task<(int count, double averageSalary)> EmployeesCountAndAverageSalaryByRole(string role)
         {
-            var employeesByRole = _dbContext.Employees.Where(e => e.Role == role);
+            var employeesByRole = _dbContext.Employees
+                .Where(e => e.Role == role)
+                .AsNoTracking();
 
             int count = await employeesByRole.CountAsync();
             double averageSalary = await employeesByRole.AverageAsync(e => e.CurrentSalary);
