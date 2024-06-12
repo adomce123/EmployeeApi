@@ -82,9 +82,9 @@ namespace EmployeeApi.Infrastructure.Repositories
             return (count, averageSalary);
         }
 
-        public async Task<bool> CheckIfCeoExists(CancellationToken ct)
+        public bool CheckIfCeoExists()
         {
-            return await _dbContext.Employees.AnyAsync(emp => emp.Role == "Ceo", ct);
+            return _dbContext.Employees.Any(emp => emp.Role == "Ceo");
         }
     }
 }

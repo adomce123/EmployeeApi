@@ -142,9 +142,9 @@ namespace EmployeeApi.Core.EmployeesService
             await _employeesRepository.Delete(existingEmployee);
         }
 
-        public async Task<bool> CheckIfCeoExists(CancellationToken ct)
+        public bool CheckIfCeoExists()
         {
-            return await _employeesRepository.CheckIfCeoExists(ct);
+            return _employeesRepository.CheckIfCeoExists();
         }
     }
 }

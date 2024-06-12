@@ -31,7 +31,7 @@ namespace EmployeeApi.Controllers.Models.Validators
             RuleFor(e => e.Role)
                 .NotEmpty().WithMessage("Role is required.")
                 .MaximumLength(50).WithMessage("Role cannot be longer than 50 characters.")
-                .MustAsync(BeUniqueCeo).WithMessage($"Only a single {CeoRole} role can exist.");
+                .Must(BeUniqueCeo).WithMessage($"Only a single {CeoRole} role can exist.");
 
             RuleFor(e => e.Birthdate)
                 .NotEmpty().WithMessage("Birthdate is required.")
@@ -70,11 +70,11 @@ namespace EmployeeApi.Controllers.Models.Validators
             return age >= YoungestAge && age <= OldestAge;
         }
 
-        private async Task<bool> BeUniqueCeo(string role, CancellationToken ct)
+        private bool BeUniqueCeo(string role)
         {
             if (role == CeoRole)
             {
-                var ifCeoExists = await _employeesService.CheckIfCeoExists(ct);
+                var ifCeoExists = _employeesService.CheckIfCeoExists();
                 if (ifCeoExists)
                     return false;
             }

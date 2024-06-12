@@ -18,13 +18,13 @@ public class EmployeeCreationValidatorTests
     }
 
     [Fact]
-    public async Task FirstNameWhenEmptyShouldHaveValidationError()
+    public void FirstNameWhenEmptyShouldHaveValidationError()
     {
         // Arrange
         var model = new EmployeeCreateRequest { FirstName = string.Empty };
 
         // Act
-        var result = await _validator.TestValidateAsync(model);
+        var result = _validator.TestValidate(model);
 
         // Assert
         result.ShouldHaveValidationErrorFor(request => request.FirstName)
@@ -32,13 +32,13 @@ public class EmployeeCreationValidatorTests
     }
 
     [Fact]
-    public async Task LastNameWhenEmptyShouldHaveValidationError()
+    public void LastNameWhenEmptyShouldHaveValidationError()
     {
         // Arrange
         var model = new EmployeeCreateRequest { LastName = string.Empty };
 
         // Act
-        var result = await _validator.TestValidateAsync(model);
+        var result = _validator.TestValidate(model);
 
         // Assert
         result.ShouldHaveValidationErrorFor(request => request.LastName)
@@ -46,7 +46,7 @@ public class EmployeeCreationValidatorTests
     }
 
     [Fact]
-    public async Task BirthdateSlightlyUnder18YearsShouldFail()
+    public void BirthdateSlightlyUnder18YearsShouldFail()
     {
         // Arrange
         var today = DateTime.Today;
@@ -55,7 +55,7 @@ public class EmployeeCreationValidatorTests
         var model = new EmployeeCreateRequest { Birthdate = birthdate };
 
         // Act 
-        var result = await _validator.TestValidateAsync(model);
+        var result = _validator.TestValidate(model);
 
         // Assert 
         result.ShouldHaveValidationErrorFor(request => request.Birthdate)
@@ -63,7 +63,7 @@ public class EmployeeCreationValidatorTests
     }
 
     [Fact]
-    public async Task ModelWhenValidShouldNotHaveValidationErrors()
+    public void ModelWhenValidShouldNotHaveValidationErrors()
     {
         // Arrange
         var model = new EmployeeCreateRequest
@@ -79,14 +79,14 @@ public class EmployeeCreationValidatorTests
         };
 
         // Act
-        var result = await _validator.TestValidateAsync(model);
+        var result = _validator.TestValidate(model);
 
         // Assert
         result.ShouldNotHaveAnyValidationErrors();
     }
 
     [Fact]
-    public async Task ShouldFailIfTryingToCreateSecondCeoRole()
+    public void ShouldFailIfTryingToCreateSecondCeoRole()
     {
         // Arrange
         var model = new EmployeeCreateRequest
@@ -100,18 +100,16 @@ public class EmployeeCreationValidatorTests
             CurrentSalary = 50000
         };
 
-        var cancellationToken = new CancellationToken();
-
-        _employeesServiceMock.Setup(_ => _.CheckIfCeoExists(cancellationToken))
-            .ReturnsAsync(true);
+        _employeesServiceMock.Setup(_ => _.CheckIfCeoExists())
+            .Returns(true);
 
         // Act
-        var result = await _validator.TestValidateAsync(model);
+        var result = _validator.TestValidate(model);
 
         result.ShouldHaveValidationErrorFor(request => request.Role)
               .WithErrorMessage("Only a single Ceo role can exist.");
 
-        _employeesServiceMock.Verify(_ => _.CheckIfCeoExists(cancellationToken), Times.Once);
+        _employeesServiceMock.Verify(_ => _.CheckIfCeoExists(), Times.Once);
     }
 }
 

@@ -13,6 +13,6 @@ namespace EmployeeApi.Core.EmployeesService.Interfaces
         Task<IEnumerable<EmployeeDto>> SearchByNameAndBirthdateInterval(EmployeeSearchRequest searchRequest);
         Task Update(int id, EmployeeCreateRequest employeeToUpdate);
         Task UpdateSalary(int id, EmployeeSalaryUpdateRequest salaryUpdateRequest);
-        Task<bool> CheckIfCeoExists(CancellationToken ct);
+        bool CheckIfCeoExists();
     }
 }
