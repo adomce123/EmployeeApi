@@ -81,5 +81,10 @@ namespace EmployeeApi.Infrastructure.Repositories
 
             return (count, averageSalary);
         }
+
+        public async Task<bool> CheckIfCeoExists(CancellationToken ct)
+        {
+            return await _dbContext.Employees.AnyAsync(emp => emp.Role == "Ceo", ct);
+        }
     }
 }

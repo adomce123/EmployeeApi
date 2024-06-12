@@ -1,21 +1,30 @@
 ﻿using EmployeeApi.Controllers.Models.Validators;
+using EmployeeApi.Core.EmployeesService.Interfaces;
 using EmployeeApi.Core.EmployeesService.Models;
 using FluentValidation.TestHelper;
+using Moq;
 
 namespace EmployeeApi.Tests;
 
 public class EmployeeCreationValidatorTests
 {
-    private readonly EmployeeCreationValidator _validator = new EmployeeCreationValidator();
+    private readonly EmployeeCreationValidator _validator;
+    private readonly Mock<IEmployeesService> _employeesServiceMock;
+
+    public EmployeeCreationValidatorTests()
+    {
+        _employeesServiceMock = new Mock<IEmployeesService>();
+        _validator = new EmployeeCreationValidator(_employeesServiceMock.Object);
+    }
 
     [Fact]
-    public void FirstNameWhenEmptyShouldHaveValidationError()
+    public async Task FirstNameWhenEmptyShouldHaveValidationError()
     {
         // Arrange
         var model = new EmployeeCreateRequest { FirstName = string.Empty };
 
         // Act
-        var result = _validator.TestValidate(model);
+        var result = await _validator.TestValidateAsync(model);
 
         // Assert
         result.ShouldHaveValidationErrorFor(request => request.FirstName)
@@ -23,13 +32,13 @@ public class EmployeeCreationValidatorTests
     }
 
     [Fact]
-    public void LastNameWhenEmptyShouldHaveValidationError()
+    public async Task LastNameWhenEmptyShouldHaveValidationError()
     {
         // Arrange
         var model = new EmployeeCreateRequest { LastName = string.Empty };
 
         // Act
-        var result = _validator.TestValidate(model);
+        var result = await _validator.TestValidateAsync(model);
 
         // Assert
         result.ShouldHaveValidationErrorFor(request => request.LastName)
@@ -37,7 +46,7 @@ public class EmployeeCreationValidatorTests
     }
 
     [Fact]
-    public void BirthdateSlightlyUnder18YearsShouldFail()
+    public async Task BirthdateSlightlyUnder18YearsShouldFail()
     {
         // Arrange
         var today = DateTime.Today;
@@ -46,15 +55,15 @@ public class EmployeeCreationValidatorTests
         var model = new EmployeeCreateRequest { Birthdate = birthdate };
 
         // Act 
-        var result = _validator.TestValidate(model);
+        var result = await _validator.TestValidateAsync(model);
 
         // Assert 
         result.ShouldHaveValidationErrorFor(request => request.Birthdate)
-              .WithErrorMessage($"Employee must be at least 18 years old and not older than 70 years.");
+              .WithErrorMessage("Employee must be at least 18 years old and not older than 70 years.");
     }
 
     [Fact]
-    public void ModelWhenValidShouldNotHaveValidationErrors()
+    public async Task ModelWhenValidShouldNotHaveValidationErrors()
     {
         // Arrange
         var model = new EmployeeCreateRequest
@@ -62,6 +71,7 @@ public class EmployeeCreationValidatorTests
             FirstName = "John",
             LastName = "Doe",
             Role = "Developer",
+            BossId = 1,
             HomeAddress = "123 Main St",
             Birthdate = new DateTime(1985, 1, 1, 0, 0, 0, DateTimeKind.Utc),
             EmploymentDate = new DateTime(2010, 1, 1, 0, 0, 0, DateTimeKind.Utc),
@@ -69,10 +79,39 @@ public class EmployeeCreationValidatorTests
         };
 
         // Act
-        var result = _validator.TestValidate(model);
+        var result = await _validator.TestValidateAsync(model);
 
         // Assert
         result.ShouldNotHaveAnyValidationErrors();
+    }
+
+    [Fact]
+    public async Task ShouldFailIfTryingToCreateSecondCeoRole()
+    {
+        // Arrange
+        var model = new EmployeeCreateRequest
+        {
+            FirstName = "John",
+            LastName = "Doe",
+            Role = "CEO",
+            HomeAddress = "123 Main St",
+            Birthdate = new DateTime(1985, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+            EmploymentDate = new DateTime(2010, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+            CurrentSalary = 50000
+        };
+
+        var cancellationToken = new CancellationToken();
+
+        _employeesServiceMock.Setup(_ => _.CheckIfCeoExists(cancellationToken))
+            .ReturnsAsync(true);
+
+        // Act
+        var result = await _validator.TestValidateAsync(model);
+
+        result.ShouldHaveValidationErrorFor(request => request.Role)
+              .WithErrorMessage("Only a single Ceo role can exist.");
+
+        _employeesServiceMock.Verify(_ => _.CheckIfCeoExists(cancellationToken), Times.Once);
     }
 }
 

@@ -14,5 +14,6 @@ namespace EmployeeApi.Infrastructure.Repositories.Interfaces
         Task<IEnumerable<Employee>> SearchByNameAndBirthdateInterval(
             string name, DateTime startDate, DateTime endDate);
         Task<(int count, double averageSalary)> EmployeesCountAndAverageSalaryByRole(string role);
+        Task<bool> CheckIfCeoExists(CancellationToken ct);
     }
 }

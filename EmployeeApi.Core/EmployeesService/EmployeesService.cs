@@ -12,7 +12,6 @@ namespace EmployeeApi.Core.EmployeesService
     {
         private readonly IEmployeesRepository _employeesRepository;
         private readonly IMapper _mapper;
-        private const string CeoRole = "Ceo";
 
         public EmployeesService(IEmployeesRepository employeesRepository, IMapper mapper)
         {
@@ -86,8 +85,6 @@ namespace EmployeeApi.Core.EmployeesService
 
         public async Task<EmployeeDto> Create(EmployeeCreateRequest employeeToCreate)
         {
-            CeoRoleValidation(employeeToCreate);
-
             var entity = _mapper.Map<Employee>(employeeToCreate);
 
             var createdEmployee = await _employeesRepository.Add(entity);
@@ -99,8 +96,6 @@ namespace EmployeeApi.Core.EmployeesService
 
         public async Task Update(int id, EmployeeCreateRequest employeeToUpdate)
         {
-            CeoRoleValidation(employeeToUpdate);
-
             var existingEmployee = await _employeesRepository.GetSingleById(id);
 
             if (existingEmployee == null)
@@ -147,17 +142,9 @@ namespace EmployeeApi.Core.EmployeesService
             await _employeesRepository.Delete(existingEmployee);
         }
 
-        private void CeoRoleValidation(EmployeeCreateRequest employee)
+        public async Task<bool> CheckIfCeoExists(CancellationToken ct)
         {
-            if (employee.Role == CeoRole && employee.BossId != null)
-            {
-                throw new InvalidOperationException($"{CeoRole} role cannot have boss id as it has no boss");
-            }
-
-            if (employee.Role != CeoRole && employee.BossId == null)
-            {
-                throw new InvalidOperationException($"Only {CeoRole} role can have no boss");
-            }
+            return await _employeesRepository.CheckIfCeoExists(ct);
         }
     }
 }

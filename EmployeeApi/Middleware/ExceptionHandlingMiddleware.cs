@@ -48,8 +48,7 @@ namespace EmployeeApi.Middleware
             }
             catch (DbUpdateException ex)
             {
-                string errorMessage = "Query failed while trying to update database. " +
-                    "Check if employee with the role of CEO already exists.";
+                string errorMessage = "Query failed while trying to update database. ";
                 _logger.LogError(ex, errorMessage);
                 httpContext.Response.ContentType = "application/json";
                 httpContext.Response.StatusCode = StatusCodes.Status400BadRequest;

@@ -43,26 +43,26 @@ namespace EmployeeApi.Controllers
         }
 
         /// <summary>
-        /// Search employees by name and birthday interval
-        /// </summary>
-        [HttpGet("search")]
-        public async Task<IActionResult> Search([FromBody] EmployeeSearchRequest searchRequest)
-        {
-            var employees = await _employeesService.SearchByNameAndBirthdateInterval(searchRequest);
-
-            return Ok(employees);
-        }
-
-        /// <summary>
         /// Gets the count and average salary of employees by role
         /// </summary>
         [HttpGet("stats/by-role/{role}")]
-        public async Task<ActionResult> GetEmployeeStatsByRole(string role)
+        public async Task<ActionResult<(int, double)>> GetEmployeeStatsByRole(string role)
         {
             var (count, averageSalary) = await _employeesService
                     .EmployeesCountAndAverageSalaryByRole(role);
 
             return Ok(new { Count = count, AverageSalary = averageSalary });
+        }
+
+        /// <summary>
+        /// Search employees by name and birthday interval
+        /// </summary>
+        [HttpPost("search")]
+        public async Task<ActionResult<IEnumerable<EmployeeDto>>> Search([FromBody] EmployeeSearchRequest searchRequest)
+        {
+            var employees = await _employeesService.SearchByNameAndBirthdateInterval(searchRequest);
+
+            return Ok(employees);
         }
 
         /// <summary>
@@ -84,7 +84,7 @@ namespace EmployeeApi.Controllers
         /// Updates employee by given id and employee request
         /// </summary>
         [HttpPut("{id}")]
-        public async Task<ActionResult> Update(int id, [FromBody] EmployeeCreateRequest request)
+        public async Task<IActionResult> Update(int id, [FromBody] EmployeeCreateRequest request)
         {
             await _employeesService.Update(id, request);
             return NoContent();
@@ -106,7 +106,7 @@ namespace EmployeeApi.Controllers
         /// Deletes employee by given id
         /// </summary>
         [HttpDelete("{id}")]
-        public async Task<ActionResult> Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
             await _employeesService.Delete(id);
 
