@@ -51,14 +51,14 @@ namespace EmployeeApi.Controllers.Models.Validators
                 {
                     if (employee.Role == CeoRole && employee.BossId != null)
                     {
-                        context.AddFailure($"{CeoRole} role cannot have a boss id as it has no boss");
+                        context.AddFailure("CeoRoleValidation", $"{CeoRole} role cannot have a boss id as it has no boss");
                     }
 
                     if (employee.Role != CeoRole && employee.BossId == null)
                     {
-                        context.AddFailure($"Only {CeoRole} role can have no boss");
+                        context.AddFailure("CeoRoleValidation", $"Only {CeoRole} role can have no boss");
                     }
-                });
+                }).WithName("CeoRoleValidation");
         }
 
         private bool BeAValidAge(DateTime birthdate)

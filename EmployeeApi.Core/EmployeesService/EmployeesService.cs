@@ -71,7 +71,7 @@ namespace EmployeeApi.Core.EmployeesService
         {
             var employees = await _employeesRepository
                 .SearchByNameAndBirthdateInterval(
-                searchRequest.Name, searchRequest.StartDate, searchRequest.EndDate);
+                searchRequest.Name, searchRequest.BirthDateFrom, searchRequest.BirthDateTo);
 
             if (!employees.Any())
             {
