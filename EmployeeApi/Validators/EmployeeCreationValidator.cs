@@ -58,7 +58,7 @@ namespace EmployeeApi.Controllers.Models.Validators
                     {
                         context.AddFailure("CeoRoleValidation", $"Only {CeoRole} role can have no boss");
                     }
-                }).WithName("CeoRoleValidation");
+                });
         }
 
         private bool BeAValidAge(DateTime birthdate)
